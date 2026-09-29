@@ -4,179 +4,332 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>SyncModz Store</title>
-  <!-- Подключение официального SDK Telegram Mini Apps -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg: var(--tg-theme-bg-color, #121214);
-      --card-bg: var(--tg-theme-secondary-bg-color, #1e1e24);
-      --text: var(--tg-theme-text-color, #ffffff);
-      --hint: var(--tg-theme-hint-color, #8e8e93);
-      --btn: var(--tg-theme-button-color, #5865f2);
-      --btn-text: var(--tg-theme-button-text-color, #ffffff);
+      --bg: #0f1015;
+      --card-bg: #181a20;
+      --card-border: rgba(255, 255, 255, 0.07);
       --accent: #00d26a;
+      --accent-glow: rgba(0, 210, 106, 0.25);
+      --btn-primary: #5865f2;
+      --text-main: #ffffff;
+      --text-muted: #9ba1b0;
+      --badge-bg: rgba(88, 101, 242, 0.15);
+      --badge-color: #7289da;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 16px; padding-bottom: 90px; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-    header { text-align: center; margin-bottom: 20px; }
-    header h1 { font-size: 22px; font-weight: 700; }
-    header p { color: var(--hint); font-size: 14px; margin-top: 4px; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 16px;
+      padding-bottom: 95px;
+      user-select: none;
+    }
 
-    .grid { display: flex; flex-direction: column; gap: 12px; }
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-top: 8px;
+    }
+
+    .shop-logo {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: linear-gradient(135deg, #fff 30%, #9ba1b0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .shop-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .catalog {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
 
     .card {
       background: var(--card-bg);
-      border-radius: 14px;
-      padding: 14px;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      transition: transform 0.1s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      transition: transform 0.15s ease, border-color 0.15s ease;
     }
-    .card:active { transform: scale(0.98); }
 
-    .card-header { display: flex; justify-content: space-between; align-items: baseline; }
-    .title { font-size: 16px; font-weight: 600; }
-    .price { font-size: 16px; font-weight: 700; color: var(--accent); }
-    .desc { font-size: 13px; color: var(--hint); line-height: 1.4; }
+    .card.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 18px var(--accent-glow);
+    }
 
-    .select-btn {
-      margin-top: 6px;
-      padding: 10px;
-      border-radius: 8px;
+    .card-banner {
+      width: 100%;
+      height: 120px;
+      background: #232733;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-body {
+      padding: 14px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: var(--badge-bg);
+      color: var(--badge-color);
+      letter-spacing: 0.5px;
+    }
+
+    .badge.hot {
+      background: rgba(255, 75, 75, 0.15);
+      color: #ff5252;
+    }
+
+    .badge.fps {
+      background: rgba(0, 210, 106, 0.15);
+      color: var(--accent);
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .price {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .btn-select {
       border: none;
-      background: var(--btn);
-      color: var(--btn-text);
-      font-size: 14px;
+      background: #2b2f3d;
+      color: #fff;
+      padding: 9px 16px;
+      font-size: 13px;
       font-weight: 600;
+      border-radius: 10px;
       cursor: pointer;
-    }
-    .select-btn.active {
-      background: #e53935;
+      transition: background 0.15s ease;
     }
 
-    /* Нижняя панель подтверждения */
-    .footer-bar {
+    .card.selected .btn-select {
+      background: #e53935;
+      color: #fff;
+    }
+
+    /* Нижняя плавающая панель покупки */
+    .checkout-bar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: var(--card-bg);
-      padding: 12px 16px;
+      background: rgba(24, 26, 32, 0.95);
+      backdrop-filter: blur(12px);
+      padding: 14px 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
       display: none;
-      box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
-      border-top: 1px solid rgba(255,255,255,0.08);
+      z-index: 100;
     }
-    .footer-content {
+
+    .checkout-content {
+      max-width: 520px;
+      margin: 0 auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      max-width: 500px;
-      margin: 0 auto;
     }
-    .order-btn {
+
+    .btn-buy {
       background: var(--accent);
-      color: #000;
+      color: #0b0c10;
       border: none;
-      padding: 12px 20px;
+      padding: 12px 24px;
       font-size: 15px;
       font-weight: 700;
-      border-radius: 10px;
+      border-radius: 12px;
       cursor: pointer;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    .btn-buy:active {
+      transform: scale(0.97);
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>SyncModz Digital</h1>
-    <p>Выберите мод или сборку для покупки</p>
+    <div class="shop-logo">SyncModz Digital</div>
+    <div class="shop-subtitle">Модификации, скрипты и графика для Majestic RP</div>
   </header>
 
-  <div class="grid" id="catalog"></div>
+  <div class="catalog" id="catalog"></div>
 
-  <div class="footer-bar" id="footer">
-    <div class="footer-content">
+  <div class="checkout-bar" id="checkout-bar">
+    <div class="checkout-content">
       <div>
-        <div style="font-size: 12px; color: var(--hint);">К оплате:</div>
-        <div style="font-size: 18px; font-weight: bold;" id="total-price">0 ₽</div>
+        <div style="font-size: 12px; color: var(--text-muted);">Итого:</div>
+        <div style="font-size: 20px; font-weight: 800; color: #fff;" id="bar-price">0 ₽</div>
       </div>
-      <button class="order-btn" onclick="submitOrder()">Купить сейчас</button>
+      <button class="btn-buy" onclick="completePurchase()">Перейти к оплате</button>
     </div>
   </div>
 
   <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand(); // Разворачиваем окно на весь экран смартфона
+    // Безопасная инициализация Telegram SDK (не крашит страницу на ПК)
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
 
-    // Список товаров (можно менять названия и цены)
-    const products = [
-      { id: "pack_majestic", title: "Сборка Majestic RP (Low PC)", price: 490, desc: "Оптимизация текстур, дорог и +30 FPS на слабом железе." },
-      { id: "script_recoil", title: "Худ + Настройка графики", price: 290, desc: "Кастомный спидометр, радар и приватные шейдеры." },
-      { id: "reshade_preset", title: "Приватный пресет ReShade", price: 190, desc: "Сочные цвета и мягкое сглаживание без потери кадров." }
+    // Каталог ваших цифровых товаров
+    const items = [
+      {
+        id: "pack_majestic",
+        title: "Сборка Majestic RP (Low PC)",
+        price: 490,
+        badge: "FPS BOOST",
+        badgeClass: "fps",
+        banner: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=700&auto=format&fit=crop&q=60",
+        desc: "Полная оптимизация текстур, дорог и эффектов. Дает прирост до +30–40 кадров на слабых видеокартах."
+      },
+      {
+        id: "script_recoil",
+        title: "Приватный HUD + Настройки",
+        price: 290,
+        badge: "ХИТ ПРОДАЖ",
+        badgeClass: "hot",
+        banner: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=700&auto=format&fit=crop&q=60",
+        desc: "Кастомный компактный радар, спидометр и настроенная четкость без замыливания картинки."
+      },
+      {
+        id: "reshade_preset",
+        title: "Пресет ReShade SyncVibe",
+        price: 190,
+        badge: "NEW",
+        badgeClass: "",
+        banner: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=700&auto=format&fit=crop&q=60",
+        desc: "Насыщенная реалистичная цветокоррекция с естественным освещением без падения FPS."
+      }
     ];
 
-    let selectedProduct = null;
+    let selectedItem = null;
 
-    function renderCatalog() {
+    function render() {
       const container = document.getElementById("catalog");
       container.innerHTML = "";
 
-      products.forEach(p => {
-        const isSelected = selectedProduct && selectedProduct.id === p.id;
+      items.forEach(prod => {
+        const isSelected = selectedItem && selectedItem.id === prod.id;
         const card = document.createElement("div");
-        card.className = "card";
+        card.className = "card" + (isSelected ? " selected" : "");
+
         card.innerHTML = `
-          <div class="card-header">
-            <span class="title">${p.title}</span>
-            <span class="price">${p.price} ₽</span>
+          <img src="${prod.banner}" class="card-banner" alt="${prod.title}">
+          <div class="card-body">
+            <div class="card-top">
+              <span class="badge ${prod.badgeClass}">${prod.badge}</span>
+            </div>
+            <div class="card-title">${prod.title}</div>
+            <div class="card-desc">${prod.desc}</div>
+            <div class="card-footer">
+              <div class="price">${prod.price} ₽</div>
+              <button class="btn-select" onclick="toggleSelect('${prod.id}')">
+                ${isSelected ? 'Отменить' : 'Выбрать'}
+              </button>
+            </div>
           </div>
-          <div class="desc">${p.desc}</div>
-          <button class="select-btn ${isSelected ? 'active' : ''}" onclick="selectItem('${p.id}')">
-            ${isSelected ? 'Отменить выбор' : 'Выбрать'}
-          </button>
         `;
         container.appendChild(card);
       });
 
-      const footer = document.getElementById("footer");
-      if (selectedProduct) {
-        footer.style.display = "block";
-        document.getElementById("total-price").innerText = selectedProduct.price + " ₽";
+      const bar = document.getElementById("checkout-bar");
+      if (selectedItem) {
+        bar.style.display = "block";
+        document.getElementById("bar-price").innerText = selectedItem.price + " ₽";
       } else {
-        footer.style.display = "none";
+        bar.style.display = "none";
       }
     }
 
-    function selectItem(id) {
-      if (selectedProduct && selectedProduct.id === id) {
-        selectedProduct = null;
+    function toggleSelect(id) {
+      if (selectedItem && selectedItem.id === id) {
+        selectedItem = null;
       } else {
-        selectedProduct = products.find(p => p.id === id);
+        selectedItem = items.find(i => i.id === id);
       }
-      renderCatalog();
+      render();
     }
 
-    // Отправка данных о заказе боту
-    function submitOrder() {
-      if (!selectedProduct) return;
-      
-      // Передаем JSON-строку обратно в Telegram-бота
-      tg.sendData(JSON.stringify({
-        product_id: selectedProduct.id,
-        title: selectedProduct.title,
-        price: selectedProduct.price
-      }));
-      
-      // Закрываем окно Mini App
-      tg.close();
+    function completePurchase() {
+      if (!selectedItem) return;
+
+      const orderPayload = JSON.stringify({
+        product_id: selectedItem.id,
+        title: selectedItem.title,
+        price: selectedItem.price
+      });
+
+      if (tg && tg.sendData) {
+        tg.sendData(orderPayload);
+        tg.close();
+      } else {
+        alert("Заказ оформлен (тестовый режим браузера): " + selectedItem.title + " за " + selectedItem.price + " ₽");
+      }
     }
 
-    renderCatalog();
+    // Запуск отрисовки
+    render();
   </script>
 </body>
 </html>
